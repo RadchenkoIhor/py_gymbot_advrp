@@ -1,6 +1,7 @@
+import asyncio
 import keyboard
-import time
 import threading
+import time
 
 print("\n Бот для автоматичної прокачки сили в спортзалі на Advance RP\n")
 print(" Для активації / деактивації - використовуйте клавішу Delete \n")
@@ -8,7 +9,6 @@ print(" Для активації / деактивації - використо�
 active = False
 
 def listen_keys():
-    global active
     def on_press(keyboard_event):
         global active
         if keyboard_event.name == 'delete':
@@ -23,25 +23,27 @@ def listen_keys():
                 else:
                     print(" DEACTIVATED\n")
                 listen_keys.last_toggle_time = current_time
-    
     keyboard.hook(on_press)
 
-def autopress():
-    global active
+async def autopress():
     while True:
         if active:
             keyboard.press("h")
-            time.sleep(5)
+            await asyncio.sleep(5)
             keyboard.release("h")
-            time.sleep(4)
+            await asyncio.sleep(4)
         else:
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
+
+def run_async_tasks():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(autopress())
+
 
 if __name__ == "__main__":
-
     thread1 = threading.Thread(target=listen_keys)
-    thread2 = threading.Thread(target=autopress)
-    
+    thread2 = threading.Thread(target=run_async_tasks)
     thread1.start()
     thread2.start()
     thread1.join()
